@@ -156,7 +156,6 @@ export class IframeMessagingClient {
   /**
    * @param {!Window} win
    * @param {string} msg
-   * @suppress {checkTypes} // Can be removed after closure compiler update their externs.
    */
   postMessageWithUserActivation_(win, msg) {
     win./*OK*/ postMessage(msg, {
@@ -220,7 +219,7 @@ export class IframeMessagingClient {
 
   /**
    * @param {string} messageType
-   * @param {Object} message
+   * @param {object} message
    */
   fireObservable_(messageType, message) {
     if (messageType in this.observableFor_) {

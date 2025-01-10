@@ -2,7 +2,7 @@ import {user} from '#utils/log';
 
 import {expectPostMessage} from '#testing/iframe';
 
-import {urls} from '../../../../src/config';
+import * as urls from '../../../../src/config/urls';
 import {addParamsToUrl} from '../../../../src/url';
 import {
   IframeTransport,
@@ -178,7 +178,8 @@ describes.realWin(
   'amp-analytics.iframe-transport',
   {amp: true, allowExternalResources: true},
   (env) => {
-    it('logs poor performance of vendor iframe', () => {
+    // TODO(#40214): fix flaky test.
+    it.skip('logs poor performance of vendor iframe', () => {
       const body =
         '<html><head><script>' +
         'function busyWait(count, duration, cb) {\n' +

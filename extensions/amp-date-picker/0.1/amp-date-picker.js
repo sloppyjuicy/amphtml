@@ -3,7 +3,7 @@ import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Keys_Enum} from '#core/constants/key-codes';
 import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {Deferred} from '#core/data-structures/promise';
-import {isRTL, iterateCursor, tryFocus} from '#core/dom';
+import {isRTL, tryFocus} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {
@@ -1084,10 +1084,10 @@ export class AmpDatePicker extends AMP.BaseElement {
       target === this.dateField_
         ? 'date'
         : target === this.startDateField_
-        ? 'startDate'
-        : target === this.endDateField_
-        ? 'endDate'
-        : '';
+          ? 'startDate'
+          : target === this.endDateField_
+            ? 'endDate'
+            : '';
     const moment = this.createMoment_(target.value);
     const isValid =
       moment && moment.isValid() && moment.year() > MIN_PICKER_YEAR;
@@ -1310,7 +1310,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   parseElementTemplates_(templates) {
     const parsed = [];
-    iterateCursor(templates, (template) =>
+    templates.forEach((template) =>
       parsed.push(this.parseElementTemplate_(template))
     );
     return parsed;
@@ -1461,8 +1461,8 @@ export class AmpDatePicker extends AMP.BaseElement {
       focusedInput === START_DATE
         ? this.startDateField_
         : focusedInput === END_DATE
-        ? this.endDateField_
-        : this.dateField_;
+          ? this.endDateField_
+          : this.dateField_;
     this.updateDateFieldFocus_(focusedField, this.state_['isOpen']);
 
     this.setState_({

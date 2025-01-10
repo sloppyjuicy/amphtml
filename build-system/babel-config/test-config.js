@@ -17,7 +17,6 @@ function getTestConfig() {
         'ads/**/*.js',
         'build-system/**/*.js',
         'extensions/**/test/**/*.js',
-        'src/bento/components/**/test/**/*.js',
         'third_party/**/*.js',
         'test/**/*.js',
         'testing/**/*.js',
@@ -51,8 +50,10 @@ function getTestConfig() {
   const testPlugins = [
     getImportResolverPlugin(),
     argv.coverage ? instanbulPlugin : null,
+    './build-system/babel-plugins/babel-plugin-amp-story-supported-languages',
     replacePlugin,
     replaceGlobalsPlugin,
+    './build-system/babel-plugins/babel-plugin-jsx-style-object',
     './build-system/babel-plugins/babel-plugin-mangle-object-values',
     './build-system/babel-plugins/babel-plugin-imported-helpers',
     './build-system/babel-plugins/babel-plugin-transform-json-import',

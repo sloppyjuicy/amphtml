@@ -53,6 +53,13 @@ feature_tests/leaks.html:30:4 CSS syntax error in tag 'style amp-custom' - saw i
 feature_tests/leaks.html:36:0 The attribute 'http-equiv' may not appear in tag 'meta'.
 |
 |  <!--
+|  %Redirects (empty attribute)
+|  -->
+|  <meta = http-equiv="refresh" content="10; url=http://leaking.via/meta-refresh">
+>> ^~~~~~~~~
+feature_tests/leaks.html:41:0 The attribute 'http-equiv' may not appear in tag 'meta'.
+|
+|  <!--
 |  %CSP
 |  -->
 |  <meta http-equiv="Content-Security-Policy" content="script-src 'self'; report-uri http://leaking.via/meta-csp-report-uri">
@@ -144,7 +151,7 @@ feature_tests/leaks.html:90:0 The attribute 'longdesc' may not appear in tag 'im
 |  -->
 |  <input type="image" src="https://leaking.via/input-src" name="test" value="test">
 >> ^~~~~~~~~
-feature_tests/leaks.html:96:0 The attribute 'src' may not appear in tag 'input'. (see https://amp.dev/documentation/components/amp-form/)
+feature_tests/leaks.html:96:0 The tag 'input' may only appear as a descendant of tag 'form [method=post]'. (see https://amp.dev/documentation/components/amp-form/)
 |  <isindex src="https://leaking.via/isindex-src" type="image">
 >> ^~~~~~~~~
 feature_tests/leaks.html:97:0 The tag 'isindex' is disallowed.

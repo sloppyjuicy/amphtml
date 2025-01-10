@@ -5,11 +5,11 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {dev, devAssert, user, userAssert} from '#utils/log';
 
-import {urls} from './config';
+import * as urls from './config/urls';
 import {getContextMetadata} from './iframe-attributes';
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
 
-/** @type {!Object<string,number>} Number of 3p frames on the for that type. */
+/** @type {!{[key: string]: number}} Number of 3p frames on the for that type. */
 let count = {};
 
 /** @type {string} */
@@ -289,6 +289,7 @@ export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {
  */
 function getAdsLocalhost(win) {
   let adsUrl = urls.thirdParty; // local dev with a non-localhost server
+  // eslint-disable-next-line local/no-forbidden-terms
   if (adsUrl == 'https://3p.ampproject.net') {
     adsUrl = 'http://ads.localhost'; // local dev with a localhost server
   }

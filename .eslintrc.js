@@ -52,10 +52,12 @@ module.exports = {
   'globals': {
     ...getExperimentGlobals(),
     'IS_ESM': 'readonly',
+    'IS_SSR_CSS': 'readonly',
     'IS_SXG': 'readonly',
     'IS_MINIFIED': 'readonly',
     'IS_PROD': 'readonly',
     'INTERNAL_RUNTIME_VERSION': 'readonly',
+    'AMP_STORY_SUPPORTED_LANGUAGES': 'readonly',
     'AMP': 'readonly',
     'context': 'readonly',
     'global': 'readonly',
@@ -252,6 +254,32 @@ module.exports = {
     'no-native-reassign': 2,
     'no-redeclare': 2,
     'no-restricted-globals': [2, 'error', 'event', 'Animation'],
+    'no-restricted-syntax': [
+      2,
+      // Ban all TS features that don't have a direct ECMAScript equivalent.
+      {
+        'selector': 'TSEnumDeclaration',
+        'message': 'Enums are banned.',
+      },
+      {
+        'selector': 'TSModuleDeclaration',
+        'message': 'Namespaces are banned.',
+      },
+      {
+        'selector': 'TSParameterProperty',
+        'message': 'Parameter properties are banned.',
+      },
+      {
+        'selector': 'Decorator',
+        'message': 'Decorators are banned.',
+      },
+      {
+        'selector': 'PropertyDefinition[declare="false"]:not([value])',
+        'message':
+          'Class properties should be declared or initialized. ' +
+          'See https://github.com/ampproject/amphtml/pull/37387#discussion_r791232943',
+      },
+    ],
     'no-script-url': 2,
     'no-self-compare': 2,
     'no-sequences': 2,
@@ -355,8 +383,6 @@ module.exports = {
         'test/**/*.js',
         'extensions/**/test/**/*.js',
         'extensions/**/test-e2e/*.js',
-        'src/bento/components/**/test/**/*.js',
-        'src/bento/components/**/test-e2e/*.js',
         'ads/**/test/**/*.js',
         'testing/**/*.js',
         'build-system/**/test/*.js',
@@ -464,12 +490,7 @@ module.exports = {
       'rules': {'import/order': 0},
     },
     {
-      'files': [
-        'extensions/**/1.0/**',
-        'src/bento/**',
-        'src/preact/**',
-        '**/storybook/**',
-      ],
+      'files': ['extensions/**/1.0/**', 'src/preact/**', '**/storybook/**'],
       'rules': {'local/preact-preferred-props': 2},
     },
     {
@@ -486,6 +507,11 @@ module.exports = {
         'extensions/*/0.*/**',
       ],
       'rules': {'local/preact': [2, '#core/dom/jsx']},
+    },
+    {
+      // Allow sinon stub for release tagger tests
+      'files': ['build-system/release-tagger/test/**'],
+      'rules': {'local/no-forbidden-terms': 0},
     },
   ],
 };

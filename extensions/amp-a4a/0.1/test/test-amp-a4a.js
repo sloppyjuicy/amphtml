@@ -20,6 +20,7 @@ import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real
 
 import * as analytics from '#utils/analytics';
 import {dev, user} from '#utils/log';
+import * as privacySandboxUtils from '#utils/privacy-sandbox-utils';
 
 import {macroTask} from '#testing/helpers';
 import {createIframePromise} from '#testing/iframe';
@@ -50,7 +51,6 @@ import {
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
-import * as secureFrame from '../secure-frame';
 import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 
 describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
@@ -918,31 +918,35 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
         verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
+        expect(a4a.iframe.getAttribute('allow')).to.include("sync-xhr 'none';");
       });
 
       it('should set feature policy for attribution-reporting when supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(true);
         a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
         verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-        expect(a4a.iframe.getAttribute('allow')).to.equal(
-          "sync-xhr 'none';attribution-reporting 'src';"
+        expect(a4a.iframe.getAttribute('allow')).to.include("sync-xhr 'none';");
+        expect(a4a.iframe.getAttribute('allow')).to.include(
+          "attribution-reporting 'src';"
         );
       });
 
       it('should not set feature policy for attribution-reporting when not supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(false);
         a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
         verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
+        expect(a4a.iframe.getAttribute('allow')).to.include("sync-xhr 'none';");
+        expect(a4a.iframe.getAttribute('allow')).to.not.include(
+          "attribution-reporting 'src';"
+        );
       });
     });
 
@@ -1035,7 +1039,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should set feature policy for attribution-reporting when supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(true);
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
@@ -1048,7 +1052,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should not set feature policy for attribution-reporting when not supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(false);
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
@@ -1059,8 +1063,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
         (headerVal) => {
-          // TODO(wg-monetization, #25690): Fails on CI.
-          it.skip(`should not attach a NameFrame when header is ${headerVal}`, async () => {
+          it(`should not attach a NameFrame when header is ${headerVal}`, async () => {
             const devStub = env.sandbox.stub(dev(), 'error');
             // Make sure there's no signature, so that we go down the 3p
             // iframe path.
@@ -1169,7 +1172,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should set feature policy for attribution-reporting when supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(true);
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
@@ -1186,7 +1189,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should not set feature policy for attribution-reporting when not supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(false);
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
@@ -1585,6 +1588,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             gdprApplies: null,
             consentStringType: null,
             additionalConsent: null,
+            consentSharedData: null,
           },
           rtcResponse
         )
@@ -2788,7 +2792,13 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
     });
 
     describe('consent integration', () => {
-      let fixture, a4aElement, a4a, consentString, consentMetadata, gdprApplies;
+      let fixture,
+        a4aElement,
+        a4a,
+        consentString,
+        consentMetadata,
+        gdprApplies,
+        consentSharedData;
       beforeEach(async () => {
         fixture = await createIframePromise();
         setupForAdTesting(fixture);
@@ -2805,6 +2815,12 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           gdprApplies,
           'consentStringType': 1,
           'additionalConsent': 'abc123',
+          purposeOne: true,
+          'gppSectionId': '1,2',
+        };
+        consentSharedData = {
+          'doubleclick-tfcd': 1,
+          'doubleclick-tfua': 1,
         };
         return fixture;
       });
@@ -2822,6 +2838,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             whenPolicyResolved: () => policyPromise,
             getConsentStringInfo: () => consentString,
             getConsentMetadataInfo: () => consentMetadata,
+            getMergedSharedData: () => consentSharedData,
           })
         );
 
@@ -2845,6 +2862,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             gdprApplies,
             consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
+            consentSharedData,
+            purposeOne: consentMetadata['purposeOne'],
+            gppSectionId: consentMetadata['gppSectionId'],
           })
         ).calledOnce;
         expect(
@@ -2880,6 +2900,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
               Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT),
             getConsentStringInfo: () => consentString,
             getConsentMetadataInfo: () => consentMetadata,
+            getMergedSharedData: () => consentSharedData,
           })
         );
 
@@ -2899,6 +2920,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             gdprApplies,
             consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
+            consentSharedData,
+            purposeOne: consentMetadata['purposeOne'],
+            gppSectionId: consentMetadata['gppSectionId'],
           })
         ).calledOnce;
         expect(
@@ -2926,6 +2950,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             getConsentMetadata: () => {
               throw new Error('consent err!');
             },
+            getMergedSharedData: () => {
+              throw new Error('consent err!');
+            },
           })
         );
 
@@ -2945,6 +2972,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentStringType: null,
             gdprApplies: null,
             additionalConsent: null,
+            consentSharedData: null,
+            purposeOne: null,
+            gppSectionId: null,
           })
         ).calledOnce;
         expect(
@@ -3515,9 +3545,96 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
     });
   });
 
+  describe('#tryExecuteRealTimeConfig storage consent test', () => {
+    let getCustomRealTimeConfigMacrosSpy;
+
+    beforeEach(() => {
+      element.setAttribute('rtc-config', true);
+      getCustomRealTimeConfigMacrosSpy = env.sandbox.spy(
+        a4a,
+        'getCustomRealTimeConfigMacros_'
+      );
+    });
+
+    for (const {
+      consentState,
+      consentString,
+      gdprApplies,
+      hasStorageConsent,
+      purposeOne,
+    } of [
+      // Unknown consent
+      {
+        consentState: CONSENT_POLICY_STATE.UNKNOWN,
+        gdprApplies: true,
+        consentString: 'string',
+        purposeOne: true,
+        hasStorageConsent: false,
+      },
+      // Insufficient consent
+      {
+        consentState: CONSENT_POLICY_STATE.INSUFFICIENT,
+        gdprApplies: true,
+        consentString: 'string',
+        purposeOne: true,
+        hasStorageConsent: false,
+      },
+      // GDPR doesn't apply
+      {
+        consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        gdprApplies: false,
+        consentString: '',
+        purposeOne: false,
+        hasStorageConsent: true,
+      },
+      // No consent string
+      {
+        consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        gdprApplies: true,
+        consentString: '',
+        purposeOne: true,
+        hasStorageConsent: false,
+      },
+      // no purpose one consent
+      {
+        consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        gdprApplies: true,
+        consentString: 'string',
+        purposeOne: false,
+        hasStorageConsent: false,
+      },
+      // GDPR applies and all prerequisite satisfied
+      {
+        consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        gdprApplies: true,
+        consentString: 'string',
+        purposeOne: true,
+        hasStorageConsent: true,
+      },
+    ]) {
+      it(
+        `storageConsent test - consentState=${consentState}, ` +
+          `consentString=${consentString}, gdprApplies=${gdprApplies},` +
+          `purposeOne=${purposeOne} -> hasStorageConsent=${hasStorageConsent}`,
+        () => {
+          return a4a
+            .tryExecuteRealTimeConfig_(consentState, consentString, {
+              gdprApplies,
+              purposeOne,
+            })
+            .then(() => {
+              expect(getCustomRealTimeConfigMacrosSpy).to.be.calledWith(
+                hasStorageConsent
+              );
+            });
+        }
+      );
+    }
+  });
+
   describe('#getCustomRealTimeConfigMacros_', () => {
     it('should return empty object', () => {
-      expect(a4a.getCustomRealTimeConfigMacros_()).to.deep.equal({});
+      expect(a4a.getCustomRealTimeConfigMacros_(true)).to.deep.equal({});
     });
   });
 

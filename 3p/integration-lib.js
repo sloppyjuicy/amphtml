@@ -14,12 +14,12 @@ import {IntegrationAmpContext} from './ampcontext-integration';
 import {installEmbedStateListener, manageWin} from './environment';
 import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
 
-import {urls} from '../src/config';
+import * as urls from '../src/config/urls';
 import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
- * @const {!Object<string, boolean>}
+ * @const {!{[key: string]: boolean}}
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
@@ -48,7 +48,6 @@ const AMP_EMBED_ALLOWED = {
   myua: true,
   mywidget: true,
   nativery: true,
-  lentainform: true,
   opinary: true,
   outbrain: true,
   plista: true,

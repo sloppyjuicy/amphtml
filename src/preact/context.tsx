@@ -16,10 +16,10 @@ export interface AmpContext {
 }
 
 export interface ProviderProps {
-  renderable: boolean | undefined;
-  playable: boolean | undefined;
-  loading: string | undefined;
-  notify?: () => {} | undefined;
+  renderable?: boolean;
+  playable?: boolean;
+  loading?: string;
+  notify?: () => {};
   children?: ComponentChildren;
 }
 
@@ -70,7 +70,7 @@ export function WithAmpContext({
         playable,
         loading,
         notify,
-      } as AmpContext),
+      }) as AmpContext,
     [renderable, playable, loading, notify]
   );
   const AmpContext = getAmpContext();
@@ -85,7 +85,7 @@ export function useAmpContext(): AmpContext {
 /**
  * Whether the calling component should currently be in the loaded state.
  */
-export function useLoading(loadingProp: Loading_Enum | string): Loading_Enum {
+export function useLoading(loadingProp?: Loading_Enum | string): Loading_Enum {
   const {loading: loadingContext} = useAmpContext();
   return loadingReducer(loadingProp, loadingContext);
 }

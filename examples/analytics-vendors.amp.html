@@ -67,7 +67,6 @@
       <option>comscore</option>
       <option>cxense</option>
       <option>deepbi</option>
-      <option>dynatrace</option>
       <option>epica</option>
       <option>euleriananalytics</option>
       <option>facebook-pixel</option>
@@ -94,6 +93,7 @@
       <option>moengage</option>
       <option>mparticle</option>
       <option>mpulse</option>
+      <option>neodata</option>
       <option>newrelic</option>
       <option>nielsen</option>
       <option>nielsen-marketing-cloud</option>
@@ -125,6 +125,7 @@
       <option>top100</option>
       <option>topmailru</option>
       <option>treasuredata</option>
+      <option>tribooanalytics</option>
       <option>umenganalytics</option>
       <option>upscore</option>
       <option>vponanalytics</option>
@@ -649,20 +650,6 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Deep.BI example -->
 
-
-<!-- dynatrace tracking -->
-<amp-analytics type="dynatrace" id="dynatrace">
-<script type="application/json">
-{
-  "vars": {
-    "app": "appid",
-    "tenant": "1"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End dynatrace example -->
-
 <!-- EPICA analytics tracking -->
 <amp-analytics type="epica" id="epica">
 <script type="application/json">
@@ -1161,7 +1148,7 @@ For complete documentation and additional examples please see: https://marketing
             "a": {
               "title": "${title}"
             },
-            "e": "amp example button click"
+            "e": "AMP example button click"
           }
         }
       }
@@ -1217,6 +1204,20 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End mParticle example -->
+
+<!-- Neodata example -->
+<amp-analytics type="neodata" id="neodata">
+  <script type="application/json">
+    {
+      "vars": {
+        "sysId": "999",
+        "tagId": "12321",
+        "advId": "56785"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Neodata example -->
 
 <!-- New Relic example -->
 <amp-analytics type="newrelic" id="newrelic">
@@ -1667,7 +1668,7 @@ For complete documentation and additional examples please see: https://marketing
   {
     "vars": {
       "collectorHost": "collector.snplow.net",
-      "appId": "amp-examples-v2.0.3",
+      "appId": "amp-examples-v2.1.0",
       "userId": "someUserId",
       "nameTracker": "testName",
       "customContexts":  "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/gdpr/jsonschema/1-0-0\",\"data\":{\"basisForProcessing\":\"legitimate_interests\"}}"
@@ -1952,6 +1953,19 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Treasure Data example -->
 
+<!-- tribooanalytics example -->
+<amp-analytics type="tribooanalytics" id="tribooanalytics">
+<script type="application/json">
+  {
+    "vars": {
+      "account": "amptest",
+      "page": "Home page"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End tribooanalytics Example -->
+
 <!-- Webtrekk tracking -->
 <amp-analytics type="webtrekk" id="webtrekk">
 <script type="application/json">
@@ -2032,7 +2046,9 @@ For complete documentation and additional examples please see: https://marketing
     "id":"123456",
     "sec":"news",
     "tgs":"modi,parliament",
-    "pc":"loggedin"
+    "pc":"loggedin",
+    "vct":"1",
+    "xcld":"1001"
   }
 }
 </script>
