@@ -796,7 +796,12 @@ export class AmpList extends AMP.BaseElement {
     let request;
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
-    return requestForBatchFetch(this.element, this.getPolicy_(), refresh)
+    return requestForBatchFetch(
+      this.element,
+      elementSrc,
+      this.getPolicy_(),
+      refresh
+    )
       .then((r) => {
         request = r;
 
@@ -1140,6 +1145,16 @@ export class AmpList extends AMP.BaseElement {
           removeChildren(container);
         }
         this.addElementsToContainer_(elements, container);
+      }
+
+      // For amp-list embedded in the amp-story-page-attachment, because the attachment is initially in
+      // nodisplay mode, the layoutCallback of all amp-img elements are not called at all, even after
+      // the attachment is opened and amp-list fetches results and inserted built amp-img(from templates)
+      // into DOM. Force call layoutCallback to render images.
+      if (this.element.closest('amp-story-page-attachment')) {
+        this.container_.querySelectorAll('amp-img').forEach((element) => {
+          element.getImpl().then((impl) => impl.layoutCallback());
+        });
       }
 
       const event = createCustomEvent(

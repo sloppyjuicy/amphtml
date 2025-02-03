@@ -77,13 +77,13 @@ export class AmpVideoIntegration {
     /** @private @const */
     this.callCounter_ = 0;
 
-    /** @private @const {!Object<number, function()>} */
+    /** @private @const {!{[key: number]: function()}} */
     this.callbacks_ = {};
 
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!Object<string, function()>} */
+    /** @private @const {!{[key: string]: function()}} */
     this.methods_ = {};
 
     /** @private @const {function()} */
@@ -278,7 +278,10 @@ export class AmpVideoIntegration {
       });
 
       // in case `canplay` fires before this script loads
-      if (player.readyState() >= /* HAVE_FUTURE_DATA */ 3) {
+      if (
+        player.readyState() >= /* HAVE_FUTURE_DATA */ 3 ||
+        /iPhone|iPad|iPod/i.test(this.win_.navigator.userAgent) // iOS 12+ no longer fires `canplay`, this is a workaround
+      ) {
         this.postEvent(canplay);
       } else {
         player.on(canplay, () => this.postEvent(canplay));
@@ -341,7 +344,7 @@ export class AmpVideoIntegration {
   /**
    * Posts a custom analytics event.
    * @param {string} eventType
-   * @param {!Object<string, string>=} opt_vars
+   * @param {!{[key: string]: string}=} opt_vars
    */
   postAnalyticsEvent(eventType, opt_vars) {
     this.postToParent_({

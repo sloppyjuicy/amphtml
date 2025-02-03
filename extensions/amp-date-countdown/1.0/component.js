@@ -27,7 +27,7 @@ const MILLISECONDS_IN_SECOND = 1000;
 /** @const {number} */
 const DELAY = 1000;
 
-/** @const {Object<string, number>} */
+/** @const {{[key: string]: number}} */
 const TimeUnit = {
   DAYS: 1,
   HOURS: 2,
@@ -58,12 +58,12 @@ const DEFAULT_RENDER = (data) =>
  * @return {PreactDef.Renderable}
  */
 export function BentoDateCountdown({
-  datetime,
-  whenEnded = DEFAULT_WHEN_ENDED,
-  locale = DEFAULT_LOCALE,
   biggestUnit = DEFAULT_BIGGEST_UNIT,
   countUp = DEFAULT_COUNT_UP,
+  datetime,
+  locale = DEFAULT_LOCALE,
   render = DEFAULT_RENDER,
+  whenEnded = DEFAULT_WHEN_ENDED,
   ...rest
 }) {
   useResourcesNotify();
@@ -182,18 +182,18 @@ function getYDHMSFromMs(ms, biggestUnit, countUp) {
     TimeUnit[biggestUnit] == TimeUnit.HOURS
       ? supportBackDate(Math.floor(ms / MILLISECONDS_IN_HOUR))
       : TimeUnit[biggestUnit] < TimeUnit.HOURS
-      ? supportBackDate(
-          Math.floor((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR)
-        )
-      : 0;
+        ? supportBackDate(
+            Math.floor((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR)
+          )
+        : 0;
   const m =
     TimeUnit[biggestUnit] == TimeUnit.MINUTES
       ? supportBackDate(Math.floor(ms / MILLISECONDS_IN_MINUTE))
       : TimeUnit[biggestUnit] < TimeUnit.MINUTES
-      ? supportBackDate(
-          Math.floor((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE)
-        )
-      : 0;
+        ? supportBackDate(
+            Math.floor((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE)
+          )
+        : 0;
   const s =
     TimeUnit[biggestUnit] == TimeUnit.SECONDS
       ? supportBackDate(Math.floor(ms / MILLISECONDS_IN_SECOND))

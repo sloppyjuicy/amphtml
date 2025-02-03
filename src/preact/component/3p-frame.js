@@ -22,7 +22,7 @@ import {
 } from '../../3p-frame';
 import {parseUrlDeprecated} from '../../url';
 
-/** @type {Object<string,function():void>} 3p frames for that type. */
+/** @type {{[key: string]: function():void}} 3p frames for that type. */
 export const countGenerators = {};
 
 // Block synchronous XHR in ad. These are very rare, but super bad for UX
@@ -39,9 +39,9 @@ const DEFAULT_SANDBOX =
 /**
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
- * @param {IframeEmbedDef.Props} props
- * @param {{current: (IframeEmbedDef.Api|null)}} ref
- * @return {PreactDef.Renderable}
+ * @param {import('./types').IframeEmbedProps} props
+ * @param {import('preact').RefObject<import('./types').IframeEmbedApi>} ref
+ * @return {import('preact').VNode}
  */
 function ProxyIframeEmbedWithRef(
   {
@@ -64,7 +64,10 @@ function ProxyIframeEmbedWithRef(
     );
   }
 
+  /** @type {import('preact/hooks').MutableRef<any>} */
   const contentRef = useRef(null);
+  // TODO: this should be IFrameEmbedApi, but it causes some minor type issues.
+  /** @type {import('preact/hooks').MutableRef<any>} */
   const iframeRef = useRef(null);
   const count = useMemo(() => {
     if (!countGenerators[type]) {
@@ -75,6 +78,7 @@ function ProxyIframeEmbedWithRef(
 
   const [nameAndSrc, setNameAndSrc] = useState({name: nameProp, src: srcProp});
   const {name, src} = nameAndSrc;
+  /** @type {import('preact/hooks').MutableRef<string?>} */
   const sentinelRef = useRef(null);
 
   useLayoutEffect(() => {
@@ -143,6 +147,7 @@ function ProxyIframeEmbedWithRef(
 
   return (
     <IframeEmbed
+      {...rest}
       allow={allow}
       contentRef={contentRef}
       messageHandler={messageHandler}
@@ -152,7 +157,6 @@ function ProxyIframeEmbedWithRef(
       sandbox={excludeSandbox ? undefined : sandbox}
       src={src}
       title={title}
-      {...rest}
     />
   );
 }

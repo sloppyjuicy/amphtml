@@ -31,7 +31,6 @@ import {
 import {CarouselControls} from './carousel-controls';
 
 /** @const {string} */
-const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';
 
 /** @const {number} */
 const NATIVE_SNAP_TIMEOUT = 200;
@@ -161,8 +160,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
       .startsWith('10.3')
       ? true
       : this.isIos_
-      ? false
-      : !isExperimentOn(this.win, 'amp-carousel-chrome-scroll-snap');
+        ? false
+        : !isExperimentOn(this.win, 'amp-carousel-chrome-scroll-snap');
 
     /** @private {boolean} */
     this.hasFirstResizedOccured_ = false;
@@ -401,7 +400,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
         if (this.hasNativeSnapPoints_) {
           this.updateOnScroll_(currentScrollLeft, ActionTrust_Enum.LOW);
         } else {
-          this.customSnap_(currentScrollLeft, undefined, ActionTrust_Enum.LOW);
+          this.customSnap_(currentScrollLeft, undefined, ActionTrust_Enum.HIGH);
         }
       }, timeout)
     );
@@ -568,8 +567,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
     const timeout = this.hasNativeSnapPoints_
       ? NATIVE_SNAP_TIMEOUT
       : this.isIos_
-      ? IOS_CUSTOM_SNAP_TIMEOUT
-      : CUSTOM_SNAP_TIMEOUT;
+        ? IOS_CUSTOM_SNAP_TIMEOUT
+        : CUSTOM_SNAP_TIMEOUT;
     // Timer that detects scroll end and/or end of snap scroll.
     this.waitForScrollSettled_(timeout);
 
@@ -694,15 +693,15 @@ export class AmpSlideScroll extends AMP.BaseElement {
         newIndex < 0
           ? this.noOfSlides_ - 1
           : newIndex >= this.noOfSlides_
-          ? 0
-          : newIndex;
+            ? 0
+            : newIndex;
     } else {
       newIndex =
         newIndex < 0
           ? 0
           : newIndex >= this.noOfSlides_
-          ? this.noOfSlides_ - 1
-          : newIndex;
+            ? this.noOfSlides_ - 1
+            : newIndex;
     }
     return newIndex;
   }
@@ -780,8 +779,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
     return currentIndex - 1 >= 0
       ? currentIndex - 1
       : this.shouldLoop_
-      ? this.noOfSlides_ - 1
-      : null;
+        ? this.noOfSlides_ - 1
+        : null;
   }
 
   /**
@@ -794,8 +793,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
     return currentIndex + 1 < this.noOfSlides_
       ? currentIndex + 1
       : this.shouldLoop_
-      ? 0
-      : null;
+        ? 0
+        : null;
   }
 
   /**
@@ -842,7 +841,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
       if (this.shouldLoop_) {
         setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
       }
-      this.slideWrappers_[showIndex].classList.add(SHOWN_CSS_CLASS);
+      this.slideWrappers_[showIndex].classList.add(ClassNames.SLIDES_ITEM_SHOW);
       const owners = Services.ownersForDoc(this.element);
       if (showIndex == newIndex) {
         owners.scheduleLayout(this.element, this.slides_[showIndex]);
@@ -929,7 +928,9 @@ export class AmpSlideScroll extends AMP.BaseElement {
   hideRestOfTheSlides_(indexArr) {
     const {noOfSlides_} = this;
     for (let i = 0; i < noOfSlides_; i++) {
-      if (!this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
+      if (
+        !this.slideWrappers_[i].classList.contains(ClassNames.SLIDES_ITEM_SHOW)
+      ) {
         continue;
       }
       // Hide if not shown anymore
@@ -937,9 +938,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
         if (this.shouldLoop_) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
-        dev()
-          .assertElement(this.slideWrappers_[i])
-          .classList.remove(SHOWN_CSS_CLASS);
+        this.slideWrappers_[i].classList.remove(ClassNames.SLIDES_ITEM_SHOW);
         this.slides_[i].removeAttribute('aria-hidden');
       }
       // Pause if not the current slide
